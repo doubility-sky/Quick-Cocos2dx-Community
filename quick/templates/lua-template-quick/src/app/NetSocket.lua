@@ -6,8 +6,8 @@ local NetSocket = {}
 
 local msgprotocol = require "app.protocol.msgprotocol"
 
-protobuf.register_file("../../../../LuaGame/src/app/protocol/game.pb") 
-protobuf.register_file("../../../../LuaGame/src/app/protocol/user.pb")  
+protobuf.register_file("/Users/winsure/Card/src/app/protocol/game.pb") 
+protobuf.register_file("/Users/Winsure/Card/src/app/protocol/user.pb")  
     
 local msgbuff = ""
 local msgsocket
@@ -134,7 +134,7 @@ function NetSocket.gate_connected(event)
     local handshake = loginuid .. ":" .. msgindex
     msgindex = msgindex+ 1
     local hmac = crypt.hmac_hash(loginsecret, handshake)
-    NetSocket.send_connect(0, handshake .. ":" .. crypt.base64encode(hmac))
+    NetSocket.send_connect(0, handshake .. ":" .. crypt.base64encode(hmac) .. ":" .. crypt.base64encode(loginkey))
 end
 
 function NetSocket.send_connect(id, data)
@@ -168,19 +168,21 @@ function NetSocket.gate_receive(event)
             delegateobject:receive_msg(name, msg)
         end
         msgbuff = msgbuff.sub(3+size, #msgbuff)
-        len = #buff
+        len = #msgbuff
     end
 end
 
 function NetSocket.send_pack(name, msg)
     local id = msgprotocol[name]
     local data = protobuf.encode(name, msg)
+
     local len = 2 + #data
     data = string.char(math.floor(len/256)%256) .. string.char(len%256) .. string.char(math.floor(id/256)%256) .. string.char(id%256) .. data
 	msgsocket:send(data)
 end
 
 function NetSocket.recv_pack(data)
+
     local id = 256*data:byte(1) + data:byte(2)
     local name = msgprotocol[id]
     local msg = protobuf.decode(name, data:sub(3, #data))
