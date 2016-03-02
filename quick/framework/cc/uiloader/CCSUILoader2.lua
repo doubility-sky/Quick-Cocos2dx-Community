@@ -608,6 +608,7 @@ function CCSUILoader:createEditBox(options)
         passwordEnable = options.PasswordEnable,
         font = options.FontResource and options.FontResource.Path,
         fontSize = options.FontSize,
+        fontColor = options.CColor,
         maxLength = options.MaxLengthEnable and options.MaxLengthText
         })
 	end

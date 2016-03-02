@@ -262,6 +262,9 @@ function UIInput.newTextField_(params)
     if params.fontSize then
         editbox:setFontSize(params.fontSize)
     end
+    if params.fontColor and params.fontColor.R and params.fontColor.G and params.fontColor.B then
+        editbox:setTextColor(cc.c4b(params.fontColor.R, params.fontColor.G, params.fontColor.B, 255))
+    end
     if params.maxLength and 0 ~= params.maxLength then
         editbox:setMaxLengthEnabled(true)
         editbox:setMaxLength(params.maxLength)
