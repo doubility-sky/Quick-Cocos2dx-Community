@@ -228,7 +228,7 @@ function uiloader:seekNodeByNameFast(parent, name)
 		return findNode
 	end
 
-	for i,v in ipairs(parent.subChildren) do
+	for k,v in pairs(parent.subChildren) do
 		findNode = self:seekNodeByName(v, name)
 		if findNode then
 			return findNode
