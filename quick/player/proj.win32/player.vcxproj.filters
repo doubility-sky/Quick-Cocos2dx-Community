@@ -88,6 +88,12 @@
     <Filter Include="Classes\quick-src\extra\nanovg\nanonode">
       <UniqueIdentifier>{9ca55602-f554-40dc-a516-f27d6facc62c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\quick-src\lua_extensions\crypt">
+      <UniqueIdentifier>{b1fdb9dc-b660-4337-ac7d-2331d1169ffc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\quick-src\lua_extensions\pbc">
+      <UniqueIdentifier>{53bd0310-abb6-44be-b693-1c047035525a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h">
@@ -411,6 +417,45 @@
     <ClInclude Include="..\Classes\UncaughtExceptionHandler.h">
       <Filter>Classes</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\crypt\lua-crypt.h">
+      <Filter>Classes\quick-src\lua_extensions\crypt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\alloc.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\array.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\bootstrap.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\context.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\descriptor.pbc.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\map.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\pattern.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\pbc.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\pbc-lua.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\proto.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\stringpool.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lib\quick-src\lua_extensions\pbc\varint.h">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp">
@@ -610,6 +655,54 @@
     </ClCompile>
     <ClCompile Include="UncaughtExceptionHandler_win32.cpp">
       <Filter>Classes\player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\crypt\lsha1.c">
+      <Filter>Classes\quick-src\lua_extensions\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\crypt\lua-crypt.c">
+      <Filter>Classes\quick-src\lua_extensions\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\alloc.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\array.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\bootstrap.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\context.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\decode.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\map.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\pattern.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\pbc-lua.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\proto.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\register.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\rmessage.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\stringpool.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\varint.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lib\quick-src\lua_extensions\pbc\wmessage.c">
+      <Filter>Classes\quick-src\lua_extensions\pbc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
