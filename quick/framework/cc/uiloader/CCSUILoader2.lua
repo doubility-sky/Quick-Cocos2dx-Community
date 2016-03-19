@@ -83,11 +83,20 @@ function CCSUILoader:generateUINode(jsonNode, parent)
 	end
 
 	uiNode:setTag(jsonNode.Tag or 0)
-	uiNode:setRotation(jsonNode.Rotation or 0)
-	uiNode:setSkewX(jsonNode.RotationSkewX or 0)
-	uiNode:setSkewY(jsonNode.RotationSkewY or 0)
+	if jsonNode.Rotation then
+		uiNode:setRotation(jsonNode.Rotation or 0)
+		uiNode:setSkewX(jsonNode.RotationSkewX or 0)
+		uiNode:setSkewY(jsonNode.RotationSkewY or 0)
+	else
+		uiNode:setRotationSkewX(jsonNode.RotationSkewX or 0)
+		uiNode:setRotationSkewY(jsonNode.RotationSkewY or 0)
+	end
 
 	-- uiNode:setVisible(jsonNode.visible) -- ccs havn't export visible attribute
+	if jsonNode.VisibleForFrame ~= nil then
+		uiNode:setVisible(jsonNode.VisibleForFrame)
+	end
+
 	if jsonNode.Scale then
 		uiNode:setScaleX((jsonNode.Scale.ScaleX or 1) * uiNode:getScaleX())
 		uiNode:setScaleY((jsonNode.Scale.ScaleY or 1) * uiNode:getScaleY())
@@ -99,6 +108,7 @@ function CCSUILoader:generateUINode(jsonNode, parent)
 	if "ScrollView" == clsName then
 		emptyNode = cc.Node:create()
 		emptyNode:setPosition(jsonNode.Position.X, jsonNode.Position.Y)
+		emptyNode:setContentSize(uiNode:getViewRect().width, uiNode:getViewRect().height)
 		uiNode:addScrollNode(emptyNode)
 	end
 
@@ -704,6 +714,10 @@ function CCSUILoader:createPanel(options)
 	node:setAnchorPoint(
 		cc.p(options.AnchorPoint.ScaleX or 0, options.AnchorPoint.ScaleY or 0))
 
+	if options.Alpha then
+		node:setCascadeOpacityEnabled(true)
+		node:setOpacity(options.Alpha)
+	end
 	return node
 end
 
