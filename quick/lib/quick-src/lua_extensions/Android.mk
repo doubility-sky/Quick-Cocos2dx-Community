@@ -8,7 +8,24 @@ LOCAL_MODULE_FILENAME := libluaextensions
 LOCAL_SRC_FILES := $(LOCAL_PATH)/lua_extensions_more.c \
                     $(LOCAL_PATH)/zlib/lua_zlib.c \
                     $(LOCAL_PATH)/filesystem/lfs.c \
-                    $(LOCAL_PATH)/lpack/lpack.c
+                    $(LOCAL_PATH)/lpack/lpack.c \
+					$(LOCAL_PATH)/crypt/lsha1.c \
+                    $(LOCAL_PATH)/crypt/lua-crypt.c \
+					$(LOCAL_PATH)/pbc/alloc.c \
+					$(LOCAL_PATH)/pbc/array.c \
+					$(LOCAL_PATH)/pbc/bootstrap.c \
+					$(LOCAL_PATH)/pbc/context.c \
+					$(LOCAL_PATH)/pbc/decode.c \
+					$(LOCAL_PATH)/pbc/map.c \
+					$(LOCAL_PATH)/pbc/pattern.c \
+					$(LOCAL_PATH)/pbc/pbc-lua.c \
+					$(LOCAL_PATH)/pbc/proto.c \
+					$(LOCAL_PATH)/pbc/register.c \
+					$(LOCAL_PATH)/pbc/rmessage.c \
+					$(LOCAL_PATH)/pbc/stringpool.c \
+					$(LOCAL_PATH)/pbc/varint.c \
+					$(LOCAL_PATH)/pbc/wmessage.c \
+
 
 LOCAL_SRC_FILES += \
                         $(LOCAL_PATH)/cjson/fpconv.c \
