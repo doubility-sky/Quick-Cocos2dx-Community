@@ -47,4 +47,4 @@ echo ""
 # build
 echo "Using prebuilt externals"
 "$ANDROID_NDK_ROOT"/ndk-build $ANDROID_NDK_BUILD_FLAGS NDK_DEBUG=$NDK_DEBUG $NDK_BUILD_FLAGS -C "$APP_ANDROID_ROOT" $* \
-"NDK_MODULE_PATH=${APP_ANDROID_ROOT}:${COCOS2DX_ROOT}:${COCOS2DX_ROOT}/cocos:${COCOS2DX_ROOT}/quick/lib:${COCOS2DX_ROOT}/external:${COCOS2DX_ROOT}/cocos/scripting:${APP_ANDROID_ROOT}/../Classes"
+"NDK_MODULE_PATH=${APP_ANDROID_ROOT}:${COCOS2DX_ROOT}/:${COCOS2DX_ROOT}/cocos:${COCOS2DX_ROOT}/quick/lib:${COCOS2DX_ROOT}/external:${COCOS2DX_ROOT}/cocos/scripting:${APP_ANDROID_ROOT}/../Classes"
