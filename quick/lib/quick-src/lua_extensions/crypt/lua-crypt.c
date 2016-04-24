@@ -913,7 +913,7 @@ extern "C" {
     lmy_encode(lua_State *L) {
         lua_Integer time = luaL_checkinteger(L, 1);
         time >>= 1;
-        char key[20] = {0};
+        char key[16] = {0};
         sprintf(key, "%x", time);
         
         size_t sz = 0;
