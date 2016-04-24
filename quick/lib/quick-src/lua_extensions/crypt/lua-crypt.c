@@ -908,6 +908,48 @@ extern "C" {
 		lua_pushlstring(L, buffer, output);
 		return 1;
 	}
+    
+    static int
+    lmy_encode(lua_State *L) {
+        lua_Integer time = luaL_checkinteger(L, 1);
+        time >>= 1;
+        char key[20] = {0};
+        sprintf(key, "%x", time);
+        
+        size_t sz = 0;
+        const char *text = luaL_checklstring(L, 2, &sz);
+        
+        lua_State *L1 = luaL_newstate();
+        lua_pushlstring(L1, key, 8);
+        lua_pushlstring(L1, text, sz);
+        ldesencode(L1);
+        
+        text = luaL_checklstring(L1, -1, &sz);
+        lua_pushlstring(L, text, sz);
+        lua_close(L1);
+        return 1;
+    }
+    
+    static int
+    lmy_decode(lua_State *L) {
+        lua_Integer time = luaL_checkinteger(L, 1);
+        time >>= 1;
+        char key[20] = {0};
+        sprintf(key, "%x", time);
+        
+        size_t sz = 0;
+        const char *text = luaL_checklstring(L, 2, &sz);
+        
+        lua_State *L1 = luaL_newstate();
+        lua_pushlstring(L1, key, 8);
+        lua_pushlstring(L1, text, sz);
+        ldesdecode(L1);
+        
+        text = luaL_checklstring(L1, -1, &sz);
+        lua_pushlstring(L, text, sz);
+        lua_close(L1);
+        return 1;
+    }
 
 	// defined in lsha1.c
 	int lsha1(lua_State *L);
@@ -931,7 +973,9 @@ extern "C" {
 				{ "base64decode", lb64decode },
 				{ "sha1", lsha1 },
 				{ "hmac_sha1", lhmac_sha1 },
-				{ "hmac_hash", lhmac_hash },
+                { "hmac_hash", lhmac_hash },
+                { "my_encode", lmy_encode },
+                { "my_decode", lmy_decode },
 				{ NULL, NULL },
 		};
 		luaL_newlib(L, l);
