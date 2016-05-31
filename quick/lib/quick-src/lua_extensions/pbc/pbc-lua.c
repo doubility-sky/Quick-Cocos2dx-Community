@@ -6,15 +6,13 @@ extern "C" {
 #include "lauxlib.h"
 
 #include "pbc.h"
+#include "pbc-lua.h"
 
 #ifdef __cplusplus
 }
 #endif
 
-#ifndef _MSC_VER
 #include <stdbool.h>
-#endif
-
 #if defined(__APPLE__)
     #include <malloc/malloc.h>
 #else
