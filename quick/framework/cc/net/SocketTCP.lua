@@ -74,13 +74,43 @@ function SocketTCP:connect(__host, __port, __retryConnectWhenFailure)
 	if __retryConnectWhenFailure ~= nil then self.isRetryConnect = __retryConnectWhenFailure end
 	assert(self.host or self.port, "Host and port are necessary!")
 	--printInfo("%s.connect(%s, %d)", self.name, self.host, self.port)
-	self.tcp = socket.tcp()
-	self.tcp:settimeout(0)
 
+	local addrinfo, err = socket.dns.getaddrinfo(self.host)
+	-- dump(addrinfo)
+	assert(addrinfo and #addrinfo > 0, "socket.dns.getaddrinfo error:" .. tostring(err))
+    -- if #addrinfo > 1 then
+    -- 	addrinfo[1], addrinfo[2] = addrinfo[2], addrinfo[1]
+    -- end
+    local function __set_tcp(family)
+		if family == "inet" then
+			self.tcp = socket.tcp()
+			-- print("try connect ipv4 ...")
+		else
+			self.tcp = socket.tcp6()
+			-- print("try connect ipv6 ...")
+		end
+	end
+	__set_tcp(addrinfo[1].family)
+
+	local idx = 1
+	local try_cnt = 0
+	local addr_num = #addrinfo
 	local function __checkConnect()
+		-- print("check conncet ...")
+		try_cnt = try_cnt + 1
+		if try_cnt % 8 == 0 then 
+			-- change to next addr family type
+			idx = idx % addr_num + 1
+			__set_tcp(addrinfo[idx].family)
+		end
+		-- print("try_cnt:", try_cnt, "idx:", idx)
+		self.tcp:settimeout(0)
 		local __succ = self:_connect()
 		if __succ then
 			self:_onConnected()
+			-- print("connect succeed!")
+		else
+			-- print("connect failed!")
 		end
 		return __succ
 	end
