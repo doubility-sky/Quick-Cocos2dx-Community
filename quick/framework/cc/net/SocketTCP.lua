@@ -76,41 +76,30 @@ function SocketTCP:connect(__host, __port, __retryConnectWhenFailure)
 	--printInfo("%s.connect(%s, %d)", self.name, self.host, self.port)
 
 	local addrinfo, err = socket.dns.getaddrinfo(self.host)
-	-- dump(addrinfo)
 	assert(addrinfo and #addrinfo > 0, "socket.dns.getaddrinfo error:" .. tostring(err))
-    -- if #addrinfo > 1 then
-    -- 	addrinfo[1], addrinfo[2] = addrinfo[2], addrinfo[1]
-    -- end
+
     local function __set_tcp(family)
 		if family == "inet" then
 			self.tcp = socket.tcp()
-			-- print("try connect ipv4 ...")
+			-- printInfo("try connect ipv4 ...")
 		else
 			self.tcp = socket.tcp6()
-			-- print("try connect ipv6 ...")
+			-- printInfo("try connect ipv6 ...")
 		end
+		self.tcp:settimeout(0)
 	end
-	__set_tcp(addrinfo[1].family)
 
 	local idx = 1
-	local try_cnt = 0
-	local addr_num = #addrinfo
+	__set_tcp(addrinfo[idx].family)
+
 	local function __checkConnect()
-		-- print("check conncet ...")
-		try_cnt = try_cnt + 1
-		if try_cnt % 8 == 0 then 
-			-- change to next addr family type
-			idx = idx % addr_num + 1
-			__set_tcp(addrinfo[idx].family)
-		end
-		-- print("try_cnt:", try_cnt, "idx:", idx)
-		self.tcp:settimeout(0)
+		-- printInfo("check conncet ...")
 		local __succ = self:_connect()
 		if __succ then
 			self:_onConnected()
-			-- print("connect succeed!")
+			-- printInfo("connect succeed!")
 		else
-			-- print("connect failed!")
+			-- printInfo("connect failed!")
 		end
 		return __succ
 	end
@@ -125,8 +114,15 @@ function SocketTCP:connect(__host, __port, __retryConnectWhenFailure)
 			self.waitConnect = self.waitConnect + SOCKET_TICK_TIME
 			if self.waitConnect >= SOCKET_CONNECT_FAIL_TIMEOUT then
 				self.waitConnect = nil
-				self:close()
-				self:_connectFailure()
+
+				idx = idx + 1
+				if idx > #addrinfo then
+					self:close()
+					self:_connectFailure()
+				else
+					self.tcp:close()
+					__set_tcp(addrinfo[idx].family)
+				end
 			end
 			__checkConnect()
 		end
@@ -151,6 +147,9 @@ end
 function SocketTCP:disconnect()
 	self:_disconnect()
 	self.isRetryConnect = false -- initiative to disconnect, no reconnect.
+	
+	if self.connectTimeTickScheduler then scheduler.unscheduleGlobal(self.connectTimeTickScheduler) end
+	if self.reconnectScheduler then scheduler.unscheduleGlobal(self.reconnectScheduler) end
 end
 
 --------------------
@@ -161,7 +160,7 @@ end
 -- @see: http://lua-users.org/lists/lua-l/2009-10/msg00584.html
 function SocketTCP:_connect()
 	local __succ, __status = self.tcp:connect(self.host, self.port)
-	-- print("SocketTCP._connect:", __succ, __status)
+	-- printInfo("connect result:%s	__status:%s", tostring(__succ) or "", tostring(__status) or "")
 	return __succ == 1 or __status == STATUS_ALREADY_CONNECTED
 end
 
@@ -180,7 +179,7 @@ end
 
 -- connecte success, cancel the connection timerout timer
 function SocketTCP:_onConnected()
-	--printInfo("%s._onConnectd", self.name)
+	printInfo("%s._onConnectd", self.name)
 	self.isConnected = true
 	self:dispatchEvent({name=SocketTCP.EVENT_CONNECTED})
 	if self.connectTimeTickScheduler then scheduler.unscheduleGlobal(self.connectTimeTickScheduler) end
@@ -189,7 +188,7 @@ function SocketTCP:_onConnected()
 		while true do
 			-- if use "*l" pattern, some buffer will be discarded, why?
 			local __body, __status, __partial = self.tcp:receive("*a")	-- read the package body
-			--print("body:", __body, "__status:", __status, "__partial:", __partial)
+			-- printInfo("body:", __body, "__status:", __status, "__partial:", __partial)
     	    if __status == STATUS_CLOSED or __status == STATUS_NOT_CONNECTED then
 		    	self:close()
 		    	if self.isConnected then
