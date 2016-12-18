@@ -135,8 +135,8 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     protected void onResume() {
         super.onResume();
 
-        Cocos2dxHelper.onResume();
-        this.mGLSurfaceView.onResume();
+        // Cocos2dxHelper.onResume();
+        // this.mGLSurfaceView.onResume();
     }
 
     @Override
@@ -371,4 +371,13 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     // ===========================================================
     // Inner and Anonymous Classes
     // ===========================================================
+   
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            Cocos2dxHelper.onResume();
+            this.mGLSurfaceView.onResume();
+        }
+    }
 }
