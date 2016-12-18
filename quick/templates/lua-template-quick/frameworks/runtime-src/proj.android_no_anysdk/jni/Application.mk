@@ -14,6 +14,8 @@ else
   APP_OPTIM := release
 endif
 
+APP_PLATFORM := android-11
+
 CC_USE_CURL := 0
 CC_USE_CCSTUDIO := 0
 CC_USE_CCBUILDER := 0
