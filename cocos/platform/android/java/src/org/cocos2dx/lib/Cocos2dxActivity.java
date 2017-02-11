@@ -135,8 +135,8 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     protected void onResume() {
         super.onResume();
 
-        // Cocos2dxHelper.onResume();
-        // this.mGLSurfaceView.onResume();
+        Cocos2dxHelper.onResume();
+        this.mGLSurfaceView.onResume();
     }
 
     @Override
