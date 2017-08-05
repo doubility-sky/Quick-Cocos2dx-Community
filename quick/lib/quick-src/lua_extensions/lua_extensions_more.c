@@ -50,6 +50,7 @@ void luaopen_lua_extensions_more(lua_State *L)
         lua_pushcfunction(L, lib->func);
         lua_setfield(L, -2, lib->name);
     }
+	
     lua_pop(L, 2);
 }
 
