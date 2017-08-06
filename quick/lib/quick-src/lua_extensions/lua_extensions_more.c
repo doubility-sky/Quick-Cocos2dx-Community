@@ -20,22 +20,43 @@ extern "C" {
 // lsqlite3
 #include "lsqlite3/lsqlite3.h"
 
+// lunqlite3
+#include "unqlite/lunqlite.h"
+
+// protoc-gen-lua
+#include "protobuf/pb.h"
+
 // pbc
 #include "pbc/pbc-lua.h"
-    
+
 // crypt
 #include "crypt/lua-crypt.h"
-    
+
+#if CC_USE_SPROTO
+LUALIB_API int luaopen_lpeg (lua_State *L);
+LUALIB_API int luaopen_sproto_core(lua_State *L);
+#endif
+
 static luaL_Reg luax_exts[] = {
     {"cjson", luaopen_cjson_safe},
     {"zlib", luaopen_zlib},
     {"pack", luaopen_pack},
     {"lfs", luaopen_lfs},
+    {"protobuf.c", luaopen_protobuf_c},
+    {"crypt", luaopen_crypt},
 #if CC_USE_SQLITE
     {"lsqlite3", luaopen_lsqlite3},
 #endif
-    {"protobuf.c", luaopen_protobuf_c},
-    {"crypt", luaopen_crypt},
+#if CC_USE_UNQLITE
+	{"unqlite", luaopen_lunqlite},
+#endif
+#if CC_USE_PROTOBUF
+    {"pb", luaopen_pb},
+#endif
+#if CC_USE_SPROTO
+    {"lpeg", luaopen_lpeg},
+    {"sproto.core", luaopen_sproto_core},
+#endif
     {NULL, NULL}
 };
 
