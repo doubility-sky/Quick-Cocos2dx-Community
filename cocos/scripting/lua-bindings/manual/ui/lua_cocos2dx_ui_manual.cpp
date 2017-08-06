@@ -24,9 +24,10 @@
 #include "lua_cocos2dx_ui_manual.hpp"
 #include "lua_cocos2dx_ui_auto.hpp"
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-#include "lua_cocos2dx_experimental_webview_auto.hpp"
 #include "lua_cocos2dx_experimental_video_auto.hpp"
 #include "lua_cocos2dx_experimental_video_manual.hpp"
+#include "lua_cocos2dx_experimental_webview_auto.hpp"
+#include "lua_cocos2dx_experimental_webview_manual.hpp"
 #endif
 #include "cocos2d.h"
 #include "tolua_fix.h"
@@ -990,6 +991,7 @@ int register_ui_moudle(lua_State* L)
         register_all_cocos2dx_experimental_video(L);
         register_all_cocos2dx_experimental_video_manual(L);
         register_all_cocos2dx_experimental_webview(L);
+        register_all_cocos2dx_experimental_webview_manual(L);
 #endif
         extendEventListenerFocusEvent(L);
     }
