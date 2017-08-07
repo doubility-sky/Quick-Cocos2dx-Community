@@ -10,11 +10,13 @@ local SOCKET_TICK_TIME = 0.1 			-- check socket data interval
 local SOCKET_RECONNECT_TIME = 5			-- socket reconnect try interval
 local SOCKET_CONNECT_FAIL_TIMEOUT = 3	-- socket failure timeout
 
+local STATUS_INVALID_ARGUMENT = "Invalid argument"
 local STATUS_CLOSED = "closed"
 local STATUS_NOT_CONNECTED = "Socket is not connected"
 local STATUS_ALREADY_CONNECTED = "already connected"
 local STATUS_ALREADY_IN_PROGRESS = "Operation already in progress"
 local STATUS_TIMEOUT = "timeout"
+local STATUS_REFUSED = "connection refused"
 
 local scheduler = require("framework.scheduler")
 local socket = require "socket"
@@ -92,42 +94,31 @@ function SocketTCP:connect(__host, __port, __retryConnectWhenFailure)
 	local idx = 1
 	__set_tcp(addrinfo[idx].family)
 
-	local function __checkConnect()
-		-- printInfo("check conncet ...")
-		local __succ = self:_connect()
-		if __succ then
+	-- check whether connection is success
+	-- the connection is failure if socket isn't connected after SOCKET_CONNECT_FAIL_TIMEOUT seconds
+	self.connectTimeTickScheduler = scheduler.scheduleGlobal(function ()
+		--printInfo("%s.connectTimeTick", self.name)
+		local succ, status = self:_connect()
+		if succ then
 			self:_onConnected()
 			-- printInfo("connect succeed!")
-		else
-			-- printInfo("connect failed!")
+			return
 		end
-		return __succ
-	end
-
-	if not __checkConnect() then
-		-- check whether connection is success
-		-- the connection is failure if socket isn't connected after SOCKET_CONNECT_FAIL_TIMEOUT seconds
-		local __connectTimeTick = function ()
-			--printInfo("%s.connectTimeTick", self.name)
-			if self.isConnected then return end
-			self.waitConnect = self.waitConnect or 0
-			self.waitConnect = self.waitConnect + SOCKET_TICK_TIME
-			if self.waitConnect >= SOCKET_CONNECT_FAIL_TIMEOUT then
-				self.waitConnect = nil
-
-				idx = idx + 1
-				if idx > #addrinfo then
-					self:close()
-					self:_connectFailure()
-				else
-					self.tcp:close()
-					__set_tcp(addrinfo[idx].family)
-				end
+		self.waitConnect = (self.waitConnect or 0) + SOCKET_TICK_TIME
+		if self.waitConnect >= SOCKET_CONNECT_FAIL_TIMEOUT 
+		   or status == STATUS_REFUSED 
+		   or status == STATUS_INVALID_ARGUMENT then
+			self.waitConnect = nil
+			idx = idx + 1
+			if idx > #addrinfo then
+				self:close()
+				self:_connectFailure()
+			else
+				self.tcp:close()
+				__set_tcp(addrinfo[idx].family)
 			end
-			__checkConnect()
 		end
-		self.connectTimeTickScheduler = scheduler.scheduleGlobal(__connectTimeTick, SOCKET_TICK_TIME)
-	end
+	end, SOCKET_TICK_TIME)
 end
 
 function SocketTCP:send(__data)
@@ -160,8 +151,8 @@ end
 -- @see: http://lua-users.org/lists/lua-l/2009-10/msg00584.html
 function SocketTCP:_connect()
 	local __succ, __status = self.tcp:connect(self.host, self.port)
-	-- printInfo("connect result:%s	__status:%s", tostring(__succ) or "", tostring(__status) or "")
-	return __succ == 1 or __status == STATUS_ALREADY_CONNECTED
+	-- printInfo("connect succ:%s status:%s", tostring(__succ) or "", tostring(__status) or "")
+	return __succ == 1 or __status == STATUS_ALREADY_CONNECTED, __status
 end
 
 function SocketTCP:_disconnect()
