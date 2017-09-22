@@ -156,7 +156,7 @@ function CCSUILoader:createUINode(clsName, options, parent)
 		return
 	end
 
-	printInfo("CCSUILoader - createUINode:" .. clsName)
+	-- printInfo("CCSUILoader - createUINode:" .. clsName)
 
 	local node
 
@@ -448,7 +448,7 @@ function CCSUILoader:createButton(options)
 			cc.ui.UILabel.new({text = options.ButtonText,
 				size = options.FontSize,
 				font = options.FontResource and options.FontResource.Path,
-				color = cc.c3b(options.TextColor.R, options.TextColor.G, options.TextColor.B)}))
+				color = cc.c3b(options.TextColor.R or 255, options.TextColor.G or 255, options.TextColor.B or 255)}))
 	end
 	if options.Size then
 		node:setButtonSize(options.Size.X, options.Size.Y)
@@ -510,7 +510,7 @@ function CCSUILoader:createCheckBox(options)
 	node:setButtonSelected(options.CheckedState)
 	node:align(self:getAnchorType(options.AnchorPoint.ScaleX or 0, options.AnchorPoint.ScaleY or 0),
 		options.Position.X or 0, options.Position.Y or 0)
-
+	node:setTouchEnabled(options.TouchEnable)
 	return node
 end
 
@@ -623,6 +623,7 @@ function CCSUILoader:createEditBox(options)
         })
 	end
 
+	editBox:setTouchEnabled(options.TouchEnable)
 	editBox:setAnchorPoint(
 		cc.p(options.AnchorPoint.ScaleX or 0, options.AnchorPoint.ScaleY or 0))
 

@@ -108,6 +108,7 @@ function UISlider:ctor(direction, images, options)
     self.images_ = clone(images)
     self.scale9_ = options.scale9
     self.scale9Size_ = nil
+    self.capInsets_ = options.capInsets
     self.min_ = checknumber(options.min or 0)
     self.max_ = checknumber(options.max or 100)
     self.value_ = self.min_
@@ -342,7 +343,7 @@ end
 function UISlider:onTouch_(event, x, y)
     if event == "began" then
         if not self:checkTouchInButton_(x, y) then return false end
-		-- bugfix:dispatchEvent may change position, so call it first
+	-- bugfix:dispatchEvent may change position, so call it first
         self:dispatchEvent({name = UISlider.PRESSED_EVENT, x = x, y = y, touchInTarget = true})
         local posx, posy = self.buttonSprite_:getPosition()
         local buttonPosition = self:convertToWorldSpace(cc.p(posx, posy))
@@ -421,7 +422,7 @@ function UISlider:updateButtonPosition_()
         
         local lbPos = cc.p(0, 0)
         if self.barfgSprite_ and self.scale9Size_ then
-            self:setContentSizeAndScale_(self.barfgSprite_, cc.size(offset * self.buttonPositionRange_.length, self.scale9Size_[2]))
+            self:setContentSizeAndScale_(self.barfgSprite_, cc.size(offset * self.buttonPositionRange_.length + buttonSize.width / 2, self.scale9Size_[2]))
             lbPos = self:getbgSpriteLeftBottomPoint_()
         end
         if self.direction_ == display.LEFT_TO_RIGHT then
@@ -494,7 +495,7 @@ function UISlider:updateImage_()
             end
 
             if self.scale9_ then
-                self.barSprite_ = display.newScale9Sprite(barImage)
+                self.barSprite_ = display.newScale9Sprite(barImage, nil, nil, nil, self.capInsets_)
                 if not self.scale9Size_ then
                     local size = self.barSprite_:getContentSize()
                     self.scale9Size_ = {size.width, size.height}
@@ -519,7 +520,7 @@ function UISlider:updateImage_()
     if barfgImage then
         if not self.barfgSprite_ then
             if self.scale9_ then
-                self.barfgSprite_ = display.newScale9Sprite(barfgImage)
+                self.barfgSprite_ = display.newScale9Sprite(barfgImage, nil, nil, nil, self.capInsets_)
                 self.barfgSprite_:setContentSize(cc.size(self.scale9Size_[1], self.scale9Size_[2]))
             else
                 self.barfgSprite_ = display.newSprite(barfgImage)
@@ -582,13 +583,17 @@ function UISlider:setContentSizeAndScale_(node, s)
         return
     end
 
-    local size = node:getContentSize()
-    local scaleX
-    local scaleY
-    scaleX = s.width/size.width
-    scaleY = s.height/size.height
-    node:setScaleX(scaleX)
-    node:setScaleY(scaleY)
+    if self.scale9_ then
+        node:setContentSize(s)
+    else
+        local size = node:getContentSize()
+        local scaleX
+        local scaleY
+        scaleX = s.width/size.width
+        scaleY = s.height/size.height
+        node:setScaleX(scaleX)
+        node:setScaleY(scaleY)
+    end
 end
 
 
