@@ -570,7 +570,7 @@ local rect = cc.rect(display.left + 100,
                     display.bottom + 100,
                     display.width - 200,
                     display.height - 200)
-local clipnode = display.newClippingRegionNode(rect)
+local clipnode = display.newClippingRectangleNode(rect)
 
 clipnode:addChild(sprite1)
 clipnode:addChild(sprite2)
