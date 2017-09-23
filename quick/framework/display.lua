@@ -585,11 +585,7 @@ scene:addChild(clipnode)
 -- end --
 
 function display.newClippingRectangleNode(rect)
-    if rect then
-        return cc.ClippingRegionNode:create(rect)
-    else
-        return cc.ClippingRegionNode:create()
-    end
+	return cc.ClippingRegionNode:create(rect)
 end
 
 -- start --
