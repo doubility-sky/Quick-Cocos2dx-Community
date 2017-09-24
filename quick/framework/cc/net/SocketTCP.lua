@@ -30,6 +30,7 @@ local STATUS_INVALID_ARGUMENT = "Invalid argument"
 local SocketTCP = class("SocketTCP")
 
 SocketTCP.EVENT_DATA = "SOCKET_TCP_DATA"
+SocketTCP.EVENT_CLOSE = "just for compatibility, remove me later!!!"
 SocketTCP.EVENT_CLOSED = "SOCKET_TCP_CLOSED"
 SocketTCP.EVENT_CONNECTED = "SOCKET_TCP_CONNECTED"
 SocketTCP.EVENT_CONNECT_FAILURE = "SOCKET_TCP_CONNECT_FAILURE"
