@@ -7,21 +7,16 @@ Last Modification: 2013-12-05
 @see http://cn.quick-x.com/?topic=quickkydsocketfzl
 
 RS-team 2016-02 ~ 2017-09 update:
-	0. clean up code
-		rename variables and functions
-		remove annoying '__', really unnecessary
 	1. Connect support ipv6
-	2. Removed reconnect timer
-		Unnecessary in this level, raise complexity
-		If cannot connect or connection broken, just notify it
-	3. EVENT_CLOSE is useless, just use EVENT_CLOSED 
-	4. EVENT_CONNECT_FAILURE is just for connecting
+	2. Clean up code, rename variables and functions, remove unnecessary '__'
+	3. Ticker improved; Remove reconnect timer
+	4. Remove EVENT_CLOSE; EVENT_CONNECT_FAILURE just for connecting
 ]]
 
 local socket = require "socket"
 local scheduler = require("framework.scheduler")
 
-local SOCKET_CONNECT_FAIL_TIMEOUT = 3	-- socket failure timeout
+local CONNECT_TIMEOUT = 3	-- socket failure timeout
 
 local STATUS_CLOSED = "closed"
 local STATUS_NOT_CONNECTED = "Socket is not connected"
@@ -35,7 +30,6 @@ local STATUS_INVALID_ARGUMENT = "Invalid argument"
 local SocketTCP = class("SocketTCP")
 
 SocketTCP.EVENT_DATA = "SOCKET_TCP_DATA"
-SocketTCP.EVENT_CLOSE = "SOCKET_TCP_CLOSE"
 SocketTCP.EVENT_CLOSED = "SOCKET_TCP_CLOSED"
 SocketTCP.EVENT_CONNECTED = "SOCKET_TCP_CONNECTED"
 SocketTCP.EVENT_CONNECT_FAILURE = "SOCKET_TCP_CONNECT_FAILURE"
@@ -56,9 +50,9 @@ function SocketTCP:ctor(host, port)
 	self.host = host
 	self.port = port
 	self.name = 'SocketTCP'
-	self.isConnected = false
-	self.tickScheduler = nil  -- timer for data
-	self.connectScheduler = nil  -- timer for connect timeout
+	self.connected = false
+	self.connector = nil  -- timer for connect timeout
+	self.ticker = nil  -- timer for data receive
 end
 
 
@@ -68,16 +62,10 @@ function SocketTCP:setName(name)
 end
 
 
-function SocketTCP:setConnFailTime(time)
-	SOCKET_CONNECT_FAIL_TIMEOUT = time
-	return self
-end
-
-
 function SocketTCP:connect()
 	printf("%s.connect(%s, %d)", self.name, self.host, self.port)
-	local addrinfo, err = socket.dns.getaddrinfo(self.host)
-	assert(addrinfo and #addrinfo > 0, "getaddrinfo error:"..tostring(err))
+	local addrs, err = socket.dns.getaddrinfo(self.host)
+	assert(addrs and #addrs > 0, "getaddrinfo error:"..tostring(err))
 
 	local function set_tcp(family)
 		print("set connect family to:", family)
@@ -88,67 +76,70 @@ function SocketTCP:connect()
 		end
 		self.tcp:settimeout(0)
 	end
-	local idx = 1
-	set_tcp(addrinfo[idx].family)
+	local idx, timecnt = 1, 0
+	set_tcp(addrs[idx].family)
 
 	local function check(dt)
-		-- printf("%s.connectTimeTick", self.name)
-		local succ, status = self:_connect()
+		local succ, st = self:_connect()
 		if succ then
-			self:_onConnected()
+			printf("%s._onConnectd", self.name)
+			self.connected = true
+			self:dispatchEvent({name=SocketTCP.EVENT_CONNECTED})
+			if self.connector then 
+				scheduler.unscheduleGlobal(self.connector)
+			end
+			self.ticker = scheduler.scheduleUpdateGlobal(handler(self, self._tick))
 			return
 		end
-		self.checktime = (self.checktime or 0) + dt
-		if self.checktime >= SOCKET_CONNECT_FAIL_TIMEOUT 
-		   or status == STATUS_REFUSED 
-		   or status == STATUS_INVALID_ARGUMENT then
-			self.checktime = nil
-			idx = idx + 1
-			if idx > #addrinfo then
-				self:_connectFailure()
+		timecnt = timecnt + dt
+		if timecnt >= CONNECT_TIMEOUT or st == STATUS_REFUSED or st == STATUS_INVALID_ARGUMENT then
+			idx, timecnt = idx+1, 0
+			if idx > #addrs then
+				printf("%s._connectFailure", self.name)
+				if self.connector then 
+					scheduler.unscheduleGlobal(self.connector)
+				end
+				self:dispatchEvent({name=SocketTCP.EVENT_CONNECT_FAILURE})
 			else
 				self.tcp:close()
-				set_tcp(addrinfo[idx].family)
+				set_tcp(addrs[idx].family)
 			end
 		end
 	end
-	self.connectScheduler = scheduler.scheduleUpdateGlobal(check)
+	self.connector = scheduler.scheduleUpdateGlobal(check)
 end
 
 
 function SocketTCP:send(data)
-	assert(self.isConnected, self.name .. " is not connected.")
+	assert(self.connected, self.name .. " is not connected.")
 	self.tcp:send(data)
 end
 
 
 function SocketTCP:close()
 	printf("%s.close", self.name)
-	self.tcp:close();
+	self.tcp:close()
 end
 
-
--- disconnect on user's own initiative.
-function SocketTCP:disconnect()
-	printf("%s.disconnect", self.name)
-	self.tcp:shutdown()
-end
+SocketTCP.disconnect = SocketTCP.close  -- for compatibility
 
 
 -- -------------------- private --------------------
 function SocketTCP:_tick(dt)
-	-- if use "*l" pattern, some buffer will be discarded, why?
-	local body, status, partial = self.tcp:receive("*a")	-- read the package body
-	if status == STATUS_CLOSED or __status == STATUS_NOT_CONNECTED then
-		printf("body:", body, "status:", status, "partial:", partial)
-		self:_onDisconnect()
+	local body, status, partial = self.tcp:receive("*a")  -- read the package body
+	if status == STATUS_CLOSED or status == STATUS_NOT_CONNECTED then
+		printf("%s._onDisConnect status:%s", self.name, status)
+		self.tcp:close()
+		self.connected = false
+		if self.ticker then
+			scheduler.unscheduleGlobal(self.ticker)
+		end
+		self:dispatchEvent({name=SocketTCP.EVENT_CLOSED})
 		return
 	end
-	if (body and string.len(body) == 0) or
-		(partial and string.len(partial) == 0) then 
+	if (body and string.len(body) == 0) or (partial and string.len(partial) == 0) then
 		return 
 	end
-	-- printf("body:", body, "status:", status, "partial:", partial)
 	if body and partial then 
 		body = body .. partial 
 	end
@@ -158,48 +149,12 @@ function SocketTCP:_tick(dt)
 end
 
 
---- When connect a connected socket server, it will return "already connected"
--- @see: http://lua-users.org/lists/lua-l/2009-10/msg00584.html
 function SocketTCP:_connect()
 	local result, status = self.tcp:connect(self.host, self.port)
 	if status ~= STATUS_ALREADY_IN_PROGRESS then
 		printf("connect result:%s status:%s", tostring(result), tostring(status))
 	end
 	return result == 1 or status == STATUS_ALREADY_CONNECTED, status
-end
-
-
--- connecte success, cancel the connection timerout timer
-function SocketTCP:_onConnected()
-	printf("%s._onConnectd", self.name)
-	self.isConnected = true
-	self:dispatchEvent({name=SocketTCP.EVENT_CONNECTED})
-	if self.connectScheduler then 
-		scheduler.unscheduleGlobal(self.connectScheduler) 
-	end
-	self.tickScheduler = scheduler.scheduleUpdateGlobal(handler(self, self._tick))
-end
-
-
-function SocketTCP:_connectFailure()
-	printf("%s._connectFailure", self.name)
-	if self.connectScheduler then 
-		scheduler.unscheduleGlobal(self.connectScheduler) 
-	end
-	self:dispatchEvent({name=SocketTCP.EVENT_CONNECT_FAILURE})
-end
-
-
-function SocketTCP:_onDisconnect()
-	printf("%s._onDisConnect", self.name)
-	self.isConnected = false
-	if self.connectScheduler then 
-		scheduler.unscheduleGlobal(self.connectScheduler) 
-	end
-	if self.tickScheduler then 
-		scheduler.unscheduleGlobal(self.tickScheduler) 
-	end
-	self:dispatchEvent({name=SocketTCP.EVENT_CLOSED})
 end
 
 
