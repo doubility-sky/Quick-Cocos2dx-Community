@@ -8,7 +8,7 @@ Last Modification: 2013-12-05
 
 RS-team 2016-02 ~ 2017-09 update:
 	1. Connect support ipv6
-	2. Clean up code, rename variables and functions, remove unnecessary '__'
+	2. Clean up code, rename variables and functions
 	3. Ticker improved; Remove reconnect timer
 	4. Remove EVENT_CLOSE; EVENT_CONNECT_FAILURE just for connecting
 ]]
@@ -80,8 +80,11 @@ function SocketTCP:connect()
 	set_tcp(addrs[idx].family)
 
 	local function check(dt)
-		local succ, st = self:_connect()
-		if succ then
+		local result, status = self.tcp:connect(self.host, self.port)
+		if status ~= STATUS_ALREADY_IN_PROGRESS then
+			printf("connect result:%s status:%s", tostring(result), tostring(status))
+		end
+		if result == 1 or status == STATUS_ALREADY_CONNECTED then
 			printf("%s._onConnectd", self.name)
 			self.connected = true
 			self:dispatchEvent({name=SocketTCP.EVENT_CONNECTED})
@@ -91,8 +94,9 @@ function SocketTCP:connect()
 			self.ticker = scheduler.scheduleUpdateGlobal(handler(self, self._tick))
 			return
 		end
+		local failed = (status == STATUS_REFUSED or status == STATUS_INVALID_ARGUMENT)
 		timecnt = timecnt + dt
-		if timecnt >= CONNECT_TIMEOUT or st == STATUS_REFUSED or st == STATUS_INVALID_ARGUMENT then
+		if timecnt >= CONNECT_TIMEOUT or failed then
 			idx, timecnt = idx+1, 0
 			if idx > #addrs then
 				printf("%s._connectFailure", self.name)
@@ -116,15 +120,12 @@ function SocketTCP:send(data)
 end
 
 
-function SocketTCP:close()
+function SocketTCP:disconnect()
 	printf("%s.close", self.name)
 	self.tcp:close()
 end
 
-SocketTCP.disconnect = SocketTCP.close  -- for compatibility
 
-
--- -------------------- private --------------------
 function SocketTCP:_tick(dt)
 	local body, status, partial = self.tcp:receive("*a")  -- read the package body
 	if status == STATUS_CLOSED or status == STATUS_NOT_CONNECTED then
@@ -146,15 +147,6 @@ function SocketTCP:_tick(dt)
 	self:dispatchEvent({
 		name=SocketTCP.EVENT_DATA, data=(partial or body), partial=partial, body=body
 	})
-end
-
-
-function SocketTCP:_connect()
-	local result, status = self.tcp:connect(self.host, self.port)
-	if status ~= STATUS_ALREADY_IN_PROGRESS then
-		printf("connect result:%s status:%s", tostring(result), tostring(status))
-	end
-	return result == 1 or status == STATUS_ALREADY_CONNECTED, status
 end
 
 
