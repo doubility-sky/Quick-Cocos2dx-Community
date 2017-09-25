@@ -65,7 +65,11 @@ end
 function SocketTCP:connect()
 	printf("%s.connect(%s, %d)", self.name, self.host, self.port)
 	local addrs, err = socket.dns.getaddrinfo(self.host)
-	assert(addrs and #addrs > 0, "getaddrinfo error:"..tostring(err))
+	if not addrs or #addrs == 0 then
+		print("getaddrinfo error:", tostring(err))
+		self:dispatchEvent({name=SocketTCP.EVENT_CONNECT_FAILURE})
+		return
+	end
 
 	local function set_tcp(family)
 		print("set connect family to:", family)
