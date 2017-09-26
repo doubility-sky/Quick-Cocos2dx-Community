@@ -152,7 +152,7 @@ function findFiles($dir, array & $files)
 
 function getScriptFileBytecodes($bit, $path, $tmpfile)
 {
-    if (!$bit) {
+    if (is_null($bit)) {
         return file_get_contents($path);
     }
 
