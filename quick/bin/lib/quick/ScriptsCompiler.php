@@ -112,11 +112,11 @@ class ScriptsCompiler
             return false;
         }
 
-        if ($this->config['bit'] != '32' && $this->config['bit'] != '64')
-        {
-            print("ERR: Invalid bit mode only support 32 or 64\n");
-            return false;
-        }
+        // if ($this->config['bit'] != '32' && $this->config['bit'] != '64')
+        // {
+        //     print("ERR: Invalid bit mode only support 32 or 64\n");
+        //     return false;
+        // }
 		if (DS == '\\' && $this->config['bit'] == '64')
 		{
             print("ERR: bit mode 64 only support on Mac\n");
@@ -295,8 +295,7 @@ class ScriptsCompiler
         $modulesBytes = array();
         foreach ($modules as $path => $module)
         {
-            // $bytes = getScriptFileBytecodes($this->config['bit'], $path, $module['tempFilePath']);
-            $bytes = file_get_contents($path);
+            $bytes = getScriptFileBytecodes($this->config['bit'], $path, $module['tempFilePath']);
             if ($xxtea)
             {
                 $bytes = $sign . $xxtea->encrypt($bytes);

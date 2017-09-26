@@ -152,6 +152,10 @@ function findFiles($dir, array & $files)
 
 function getScriptFileBytecodes($bit, $path, $tmpfile)
 {
+    if (!$bit) {
+        return file_get_contents($path);
+    }
+
     if (!file_exists($path))
     {
         printf("ERR: cannot read Lua source file %s\n", $path);
