@@ -80,11 +80,12 @@ class ResEncrpty
 		}
 
 		$files = $this->searchSourceFiles();
-		return $this->encryptFiles($files);
+		$this->encryptFiles($files);
 
 
 		printf("create output files in %s .\n", $this->config['output']);
 		printf("done.\n");
+		return true;
 	}
 
 	protected function searchSourceFiles()
