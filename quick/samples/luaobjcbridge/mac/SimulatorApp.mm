@@ -229,6 +229,8 @@ void createSimulator(const char* viewName, float width, float height,bool isLand
         {
             [_fileHandle writeData:[str dataUsingEncoding:NSUTF8StringEncoding]];
         }
+    } else {
+        NSLog(@"Received non utf8 data, can't print");
     }
 }
 
