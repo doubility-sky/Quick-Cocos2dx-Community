@@ -157,6 +157,8 @@ std::string getCurAppName(void)
         {
             [_fileHandle writeData:[str dataUsingEncoding:NSUTF8StringEncoding]];
         }
+    } else {
+        NSLog(@"Received non utf8 data, can't print");
     }
 }
 
