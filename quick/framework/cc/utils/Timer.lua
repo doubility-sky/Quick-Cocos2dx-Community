@@ -99,7 +99,7 @@ function Timer.new()
     function timer:addCountdown(eventName, countdown, interval)
         eventName = tostring(eventName)
         assert(not countdowns[eventName], "eventName '" .. eventName .. "' exists")
-        assert(type(countdown) == "number" and countdown >= 2, "invalid countdown")
+        assert(type(countdown) == "number" and countdown >= 30, "invalid countdown")
 
         if type(interval) ~= "number" then
             interval = 30
